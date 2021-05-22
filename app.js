@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
+const auth = require('./middlewares/auth');
 const userRouter = require('./routes/user');
 const cardRouter = require('./routes/card');
 
@@ -11,6 +13,13 @@ const {
   DB_NAME,
 } = process.env;
 const app = express();
+
+app.use(cors({ origin: 'http://localhost' }));
+app.use(express.json());
+app.use(auth);
+
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 mongoose
   .connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
