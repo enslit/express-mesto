@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 const auth = require('./middlewares/auth');
-const userRouter = require('./routes/user');
-const cardRouter = require('./routes/card');
+const usersRouter = require('./routes/users');
+const cardsRouter = require('./routes/cards');
+const errorLogger = require('./middlewares/errorLogger');
+const clientErrorHandler = require('./middlewares/clientErrorHandler');
 
 const {
   SERVER_PORT = 5000,
@@ -18,8 +20,11 @@ app.use(cors({ origin: 'http://localhost' }));
 app.use(express.json());
 app.use(auth);
 
-app.use('/users', userRouter);
-app.use('/cards', cardRouter);
+app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
+
+app.use(errorLogger);
+app.use(clientErrorHandler);
 
 mongoose
   .connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
