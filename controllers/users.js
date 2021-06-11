@@ -21,15 +21,21 @@ module.exports.getUser = (req, res, next) =>
     .catch(next);
 
 module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar } = req.body;
+  const { email, password, name, about, avatar } = req.body;
 
-  if (name && about && avatar) {
-    return User.create({ name, about, avatar })
+  if (email && password) {
+    return User.create({
+      email,
+      password,
+      name,
+      about,
+      avatar,
+    })
       .then((user) => res.status(201).json(user))
       .catch(next);
   }
 
-  return next(createError(400, 'не передано поле name about или avatar'));
+  return next(createError(400, 'не передано поле email или password'));
 };
 
 module.exports.updateProfile = (req, res, next) => {

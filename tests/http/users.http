@@ -14,9 +14,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "Еще один пользователь",
-  "about": "some about text",
-  "avatar": "http://example.com/image.jpg"
+  "email": "asdf@asdf.ee",
+  "password": "123456"
 }
 
 ### PATCH Update user profile
