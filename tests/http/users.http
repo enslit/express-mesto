@@ -9,12 +9,12 @@ Accept: application/json
 Content-Type: application/json
 
 ### POST Create new user
-POST http://localhost:5000/users
+POST http://localhost:5000/signup
 Content-Type: application/json
 Accept: application/json
 
 {
-  "email": "asdf@asdf.ee",
+  "email": "asdf@asdfw.eee",
   "password": "123456"
 }
 

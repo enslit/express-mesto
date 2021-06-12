@@ -1,8 +1,20 @@
-module.exports = function auth(req, res, next) {
-  req.user = {
-    // _id: '60a9687ae006774b800fbfa2',
-    _id: '60a96895e006774b800fbfa3',
-  };
+const jsonwebtoken = require('jsonwebtoken');
+const { createError } = require('../utils/utils');
 
-  next();
+module.exports = function auth(req, res, next) {
+  const { jwt } = req.cookies;
+
+  if (!jwt) {
+    return next(createError(401, 'Не авторизован'));
+  }
+
+  jsonwebtoken.verify(jwt, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return next(createError(401, err.message));
+    }
+
+    req.user = decoded._id;
+  });
+
+  return next();
 };
