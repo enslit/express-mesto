@@ -3,10 +3,6 @@ GET http://localhost:5000/users/
 Accept: application/json
 Content-Type: application/json
 
-### GET Single user by ID
-GET http://localhost:5000/users/60a96895e006774b800fbfa3
-Accept: application/json
-Content-Type: application/json
 
 ### POST Create new user
 POST http://localhost:5000/signup
@@ -14,9 +10,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "email": "asdf@asdfw.eee",
+  "email": "a@11.ru",
   "password": "123456"
 }
+
 
 ### PATCH Update user profile
 PATCH http://localhost:5000/users/me
@@ -28,6 +25,7 @@ Accept: application/json
   "about": "updated about"
 }
 
+
 ### PATCH Update user avatar
 PATCH http://localhost:5000/users/me/avatar
 Content-Type: application/json
@@ -35,4 +33,15 @@ Accept: application/json
 
 {
   "avatar": "http://example.com/new-avatar.jpg"
+}
+
+
+### Login
+POST http://localhost:5000/signin
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "a@11.ru",
+  "password": "123456"
 }

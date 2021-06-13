@@ -24,7 +24,7 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   if (name && link) {
-    return Cards.create({ name, link, owner: req.user._id })
+    return Cards.create({ name, link, owner: req.user })
       .then((card) => res.status(201).json(card))
       .catch(next);
   }
@@ -35,7 +35,7 @@ module.exports.createCard = (req, res, next) => {
 module.exports.likeCard = (req, res, next) =>
   Cards.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user } },
     { new: true }
   )
     .then((card) => {
@@ -52,7 +52,7 @@ module.exports.likeCard = (req, res, next) =>
 module.exports.dislikeCard = (req, res, next) =>
   Cards.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user } },
     { new: true }
   )
     .then((card) => {

@@ -1,32 +1,19 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { createError } = require('../utils/utils');
+const NotFountError = require('../utils/NotFountError');
+const BadRequestError = require('../utils/BadRequestError');
 
 module.exports.getUsers = (req, res, next) =>
   User.find({})
     .then((users) => res.json(users))
     .catch(next);
 
-module.exports.getUser = (req, res, next) =>
-  User.findById(req.params.id)
-    .exec()
-    .then((user) => {
-      if (user) {
-        return res.json(user);
-      }
-
-      return next(
-        createError(404, `Пользователь с ID: ${req.params.id} не найден`)
-      );
-    })
-    .catch(next);
-
 module.exports.getUserProfile = (req, res, next) =>
   User.findById(req.user)
     .then((user) => {
       if (!user) {
-        return next(createError(400, 'Пользователь не найден'));
+        throw new NotFountError('Пользователь не найден');
       }
 
       return res.json(user);
@@ -34,31 +21,29 @@ module.exports.getUserProfile = (req, res, next) =>
     .catch(next);
 
 module.exports.createUser = async (req, res, next) => {
-  try {
-    const { email, password, name, about, avatar } = req.body;
+  const { email, password, name, about, avatar } = req.body;
 
-    const candidate = await User.findOne({ email });
-
-    if (candidate) {
-      return next(
-        createError(400, 'Пользователь с таким email уже зарегистрирован')
-      );
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      email,
-      password: passwordHash,
-      name,
-      about,
-      avatar,
-    });
-
-    return res.status(201).json(user);
-  } catch (e) {
-    return next(e);
-  }
+  return User.findOne({ email })
+    .exec()
+    .then((user) => {
+      if (user) {
+        throw new BadRequestError(
+          'Пользователь с таким email уже зарегистрирован'
+        );
+      }
+    })
+    .then(() => bcrypt.hash(password, 10))
+    .then((passwordHash) =>
+      User.create({
+        email,
+        password: passwordHash,
+        name,
+        about,
+        avatar,
+      })
+    )
+    .then((user) => res.status(201).json(user))
+    .catch(next);
 };
 
 module.exports.updateProfile = (req, res, next) => {
@@ -85,6 +70,6 @@ module.exports.login = (req, res, next) =>
         httpOnly: true,
       });
 
-      return res.end();
+      return res.end('Authorized');
     })
     .catch(next);
