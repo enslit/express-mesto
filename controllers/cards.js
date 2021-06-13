@@ -1,5 +1,6 @@
 const Cards = require('../models/card');
-const { createError } = require('../utils/utils');
+const NotFountError = require('../utils/NotFountError');
+const ForbiddenError = require('../utils/ForbiddenError');
 
 module.exports.getCards = (req, res, next) =>
   Cards.find({})
@@ -7,30 +8,28 @@ module.exports.getCards = (req, res, next) =>
     .catch(next);
 
 module.exports.deleteCard = (req, res, next) =>
-  Cards.findByIdAndDelete(req.params.cardId)
+  Cards.findById(req.params.cardId)
     .exec()
     .then((card) => {
-      if (card) {
-        return res.json(card);
+      if (!card) {
+        throw new NotFountError(
+          `Карточка с ID: ${req.params.cardId} не найдена`
+        );
       }
 
-      return next(
-        createError(404, `Карточка с ID: ${req.params.cardId} не найдена`)
-      );
+      if (String(card.owner) !== req.user) {
+        throw new ForbiddenError('Нарушение доступа');
+      }
+
+      return Cards.findByIdAndDelete(req.params.cardId);
     })
+    .then((card) => res.json(card))
     .catch(next);
 
-module.exports.createCard = (req, res, next) => {
-  const { name, link } = req.body;
-
-  if (name && link) {
-    return Cards.create({ name, link, owner: req.user })
-      .then((card) => res.status(201).json(card))
-      .catch(next);
-  }
-
-  return next(createError(404, 'не передано поле name или link'));
-};
+module.exports.createCard = (req, res, next) =>
+  Cards.create({ name: req.body.name, link: req.body.link, owner: req.user })
+    .then((card) => res.status(201).json(card))
+    .catch(next);
 
 module.exports.likeCard = (req, res, next) =>
   Cards.findByIdAndUpdate(
@@ -39,13 +38,13 @@ module.exports.likeCard = (req, res, next) =>
     { new: true }
   )
     .then((card) => {
-      if (card) {
-        return res.json(card);
+      if (!card) {
+        throw new NotFountError(
+          `Карточка с ID: ${req.params.cardId} не найдена`
+        );
       }
 
-      return next(
-        createError(404, `Карточка с ID: ${req.params.cardId} не найдена`)
-      );
+      return res.json(card);
     })
     .catch(next);
 
@@ -56,12 +55,11 @@ module.exports.dislikeCard = (req, res, next) =>
     { new: true }
   )
     .then((card) => {
-      if (card) {
-        return res.json(card);
+      if (!card) {
+        throw new NotFountError(
+          `Карточка с ID: ${req.params.cardId} не найдена`
+        );
       }
-
-      return next(
-        createError(404, `Карточка с ID: ${req.params.cardId} не найдена`)
-      );
+      return res.json(card);
     })
     .catch(next);

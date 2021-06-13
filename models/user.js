@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const { isEmail } = require('validator');
 const { Schema, model } = require('mongoose');
-const { createError } = require('../utils/utils');
+const BadRequestError = require('../utils/BadRequestError');
 
 const userSchema = new Schema({
   email: {
@@ -39,12 +39,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(createError(400, 'Неверный email или пароль'));
+        throw new BadRequestError('Неверный email или пароль');
       }
 
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(createError(400, 'Неверный email или пароль'));
+          throw new BadRequestError('Неверный email или пароль');
         }
 
         return user;
