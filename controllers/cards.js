@@ -1,6 +1,6 @@
 const Cards = require('../models/card');
-const NotFountError = require('../utils/NotFountError');
-const ForbiddenError = require('../utils/ForbiddenError');
+const NotFountError = require('../utils/httpErrors/NotFountError');
+const ForbiddenError = require('../utils/httpErrors/ForbiddenError');
 
 module.exports.getCards = (req, res, next) =>
   Cards.find({})
@@ -37,6 +37,7 @@ module.exports.likeCard = (req, res, next) =>
     { $addToSet: { likes: req.user } },
     { new: true }
   )
+    .exec()
     .then((card) => {
       if (!card) {
         throw new NotFountError(
@@ -54,6 +55,7 @@ module.exports.dislikeCard = (req, res, next) =>
     { $pull: { likes: req.user } },
     { new: true }
   )
+    .exec()
     .then((card) => {
       if (!card) {
         throw new NotFountError(

@@ -3,13 +3,12 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
+const { Joi, celebrate, Segments, errors } = require('celebrate');
 const auth = require('./middlewares/auth');
-const usersRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
 const errorLogger = require('./middlewares/errorLogger');
 const clientErrorHandler = require('./middlewares/clientErrorHandler');
-const { createUser } = require('./controllers/users');
-const { login } = require('./controllers/users');
+const { NotFountError } = require('./utils/httpErrors');
+const { createUser, login } = require('./controllers/users');
 
 const {
   SERVER_PORT = 5000,
@@ -23,11 +22,39 @@ app.use(cors({ origin: 'http://localhost' }));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/signin', login);
-app.use('/signup', createUser);
-app.use('/users', auth, usersRouter);
-app.use('/cards', auth, cardsRouter);
+app.post(
+  '/signin',
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(6),
+    }),
+  }),
+  login
+);
 
+app.post(
+  '/signup',
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(6),
+      name: Joi.string(),
+      about: Joi.string(),
+      avatar: Joi.string(),
+    }),
+  }),
+  createUser
+);
+
+app.use('/users', auth, require('./routes/users'));
+app.use('/cards', auth, require('./routes/cards'));
+
+app.use(() => {
+  throw new NotFountError('Запрашиваемый ресурс не найден');
+});
+
+app.use(errors());
 app.use(errorLogger);
 app.use(clientErrorHandler);
 

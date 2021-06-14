@@ -1,5 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken');
-const UnauthorizedError = require('../utils/UnauthorizedError');
+const UnauthorizedError = require('../utils/httpErrors/UnauthorizedError');
 
 module.exports = function auth(req, res, next) {
   try {

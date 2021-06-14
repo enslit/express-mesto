@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const { isEmail } = require('validator');
 const { Schema, model } = require('mongoose');
-const BadRequestError = require('../utils/BadRequestError');
+const BadRequestError = require('../utils/httpErrors/BadRequestError');
 
 const userSchema = new Schema({
   email: {

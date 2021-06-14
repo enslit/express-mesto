@@ -15,6 +15,12 @@ Accept: application/json
 }
 
 
+### Get User Profile
+GET http://localhost:5000/users/me
+Content-Type: application/json
+Accept: application/json
+
+
 ### PATCH Update user profile
 PATCH http://localhost:5000/users/me
 Content-Type: application/json

@@ -1,8 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const NotFountError = require('../utils/NotFountError');
-const BadRequestError = require('../utils/BadRequestError');
+const { NotFoundError, ConflictError } = require('../utils/httpErrors');
 
 module.exports.getUsers = (req, res, next) =>
   User.find({})
@@ -13,7 +12,7 @@ module.exports.getUserProfile = (req, res, next) =>
   User.findById(req.user)
     .then((user) => {
       if (!user) {
-        throw new NotFountError('Пользователь не найден');
+        throw new NotFoundError('Пользователь не найден');
       }
 
       return res.json(user);
@@ -27,7 +26,7 @@ module.exports.createUser = async (req, res, next) => {
     .exec()
     .then((user) => {
       if (user) {
-        throw new BadRequestError(
+        throw new ConflictError(
           'Пользователь с таким email уже зарегистрирован'
         );
       }
@@ -48,13 +47,19 @@ module.exports.createUser = async (req, res, next) => {
 
 module.exports.updateProfile = (req, res, next) => {
   const { name, about } = req.body;
-  return User.findByIdAndUpdate(req.user._id, { name, about })
-    .then((updatedUser) => res.json(updatedUser))
+  return User.findByIdAndUpdate(req.user, { name, about })
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        throw new Error('Что-то пошло не так. Пользователь не обновлен');
+      }
+
+      return res.json(updatedUser);
+    })
     .catch(next);
 };
 
 module.exports.updateAvatar = (req, res, next) =>
-  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar })
+  User.findByIdAndUpdate(req.user, { avatar: req.body.avatar })
     .then((updatedUser) => res.json(updatedUser))
     .catch(next);
 
