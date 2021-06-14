@@ -41,7 +41,7 @@ module.exports.createUser = async (req, res, next) => {
         avatar,
       })
     )
-    .then((user) => res.status(201).json(user))
+    .then(() => res.status(201).json({ message: 'Пользователь создан' }))
     .catch(next);
 };
 
@@ -66,7 +66,8 @@ module.exports.updateAvatar = (req, res, next) =>
 module.exports.login = (req, res, next) =>
   User.findUserByCredentials(req.body.email, req.body.password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      const { JWT_SECRET = 'dev-key' } = process.env;
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: '7d',
       });
 
@@ -75,6 +76,6 @@ module.exports.login = (req, res, next) =>
         httpOnly: true,
       });
 
-      return res.end('Authorized');
+      return res.json({ message: 'Authorized' });
     })
     .catch(next);

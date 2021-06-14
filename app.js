@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 require('dotenv').config();
 const { Joi, celebrate, Segments, errors } = require('celebrate');
 const auth = require('./middlewares/auth');
@@ -14,13 +16,20 @@ const {
   SERVER_PORT = 5000,
   DB_HOST = 'localhost',
   DB_PORT = 27017,
-  DB_NAME,
+  DB_NAME = 'mestodb',
 } = process.env;
 const app = express();
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+});
 
 app.use(cors({ origin: 'http://localhost' }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(limiter);
+app.use(helmet());
 
 app.post(
   '/signin',
