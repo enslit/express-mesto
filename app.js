@@ -41,7 +41,9 @@ app.post(
       password: Joi.string().required().min(6),
       name: Joi.string(),
       about: Joi.string(),
-      avatar: Joi.string(),
+      avatar: Joi.string().regex(
+        /^https?:\/\/(www\.)?[a-zA-Z0-9-.]+\.[a-z]{2,}\/[\S]+\.(png|jpg)/
+      ),
     }),
   }),
   createUser
