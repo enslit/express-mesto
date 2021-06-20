@@ -32,7 +32,7 @@ app.use(limiter);
 app.use(helmet());
 
 app.post(
-  '/signin',
+  '/api/signin',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       email: Joi.string().required().email(),
@@ -43,7 +43,7 @@ app.post(
 );
 
 app.post(
-  '/signup',
+  '/api/signup',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       email: Joi.string().required().email(),
@@ -58,8 +58,8 @@ app.post(
   createUser
 );
 
-app.use('/users', auth, require('./routes/users'));
-app.use('/cards', auth, require('./routes/cards'));
+app.use('/api/users', auth, require('./routes/users'));
+app.use('/api/cards', auth, require('./routes/cards'));
 
 app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
